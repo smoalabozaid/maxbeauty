@@ -1,0 +1,318 @@
+:root {
+    --primary-gold: #C5A059;
+    --primary-gold-light: #EAD196;
+    --primary-gold-dark: #8E6F3E;
+    --accent-rose: #F3D7CA;
+    --bg-dark: #0F0F0F;
+    --bg-light: #F9F7F2;
+    --text-main: #1A1A1A;
+    --text-muted: #5A5A5A;
+    --white: #FFFFFF;
+
+    /* Typography */
+    --font-arabic: 'Cairo', sans-serif;
+    --font-english: 'Montserrat', sans-serif;
+
+    /* Spacing & Transitions */
+    --transition-smooth: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.08);
+    --glass: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-arabic);
+    direction: rtl;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-gold);
+    border-radius: 10px;
+}
+
+/* Layout Utilities */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-padding {
+    padding: 80px 0;
+}
+
+/* Premium Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-dark));
+    color: var(--white);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary-gold);
+    color: var(--primary-gold);
+}
+
+.btn-outline:hover {
+    background: var(--primary-gold);
+    color: var(--white);
+}
+
+/* Typography Enhancements */
+h1,
+h2,
+h3 {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--primary-gold);
+    margin: 15px auto;
+}
+
+/* Animations Wrapper - Temporarily visible by default for troubleshooting */
+.reveal {
+    opacity: 1;
+    /* Changed from 0 */
+    transform: translateY(0);
+    /* Changed from 30px */
+    transition: var(--transition-smooth);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+}
+
+/* Booking Form Styles */
+.booking-section {
+    background: linear-gradient(135deg, #F3D7CA, #FFFFFF);
+    padding: 100px 0;
+}
+
+.booking-card {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 50px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary-gold-dark);
+}
+
+.form-control {
+    width: 100%;
+    padding: 15px 20px;
+    border: 1px solid #DDD;
+    border-radius: 12px;
+    font-family: var(--font-arabic);
+    font-size: 1rem;
+    transition: var(--transition-smooth);
+    background: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+}
+
+/* Multi-step Logic Visible */
+.step-content {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.step-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Grid for Service Options */
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.option-item {
+    border: 2px solid #EEE;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.option-item:hover,
+.option-item.selected {
+    border-color: var(--primary-gold);
+    background: var(--primary-gold-light);
+    color: var(--primary-gold-dark);
+}
+
+/* Professional Service Cards */
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    padding: 20px 0;
+}
+
+.service-card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-premium);
+    transition: var(--transition-smooth);
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+}
+
+.service-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    height: 250px;
+}
+
+.service-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-smooth);
+}
+
+.service-card:hover img {
+    transform: scale(1.1);
+}
+
+.service-card-content {
+    padding: 30px;
+    text-align: center;
+}
+
+.service-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: var(--primary-gold-dark);
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.service-card h3::after {
+    content: ' !important;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: var(--primary-gold);
+}
+
+.service-card p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 25px;
+    line-height: 1.8;
+}
+
+.card-btn {
+    color: var(--primary-gold-dark);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: var(--transition-smooth);
+}
+
+.card-btn:hover {
+    color: var(--primary-gold);
+    gap: 15px;
+}

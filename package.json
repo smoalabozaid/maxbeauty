@@ -1,0 +1,12 @@
+{
+    "name": "beauty-salon-qatar",
+    "version": "1.0.0",
+    "description": "Premium Beauty Salon Website in Qatar",
+    "main": "index.html",
+    "scripts": {
+        "start": "npx serve ."
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

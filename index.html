@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صالون الجمال الفاخر | تجربة الأناقة والرقي في قطر</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Montserrat:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <style>
+        /* Essential Styling to ensure visibility */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1974&auto=format&fit=crop') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            color: #eee;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 0;
+            z-index: 1000;
+            background: transparent;
+            transition: var(--transition-smooth);
+        }
+
+        header.sticky {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 0;
+            box-shadow: var(--shadow-premium);
+            backdrop-filter: blur(10px);
+        }
+
+        header.sticky .nav-links a {
+            color: var(--text-main);
+        }
+
+        header.sticky .logo {
+            color: var(--primary-gold-dark);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-gold-light);
+        }
+
+        .service-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-btns {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header id="main-header">
+        <div class="navbar">
+            <a href="#hero" class="logo">جمال وأناقة</a>
+            <ul class="nav-links">
+                <li><a href="#hero">الرئيسية</a></li>
+                <li><a href="#services">خدماتنا</a></li>
+                <li><a href="#about">من نحن</a></li>
+                <li><a href="#testimonials">آراء العميلات</a></li>
+                <li><a href="#contact">اتصل بنا</a></li>
+            </ul>
+            <a href="#booking" id="book-btn-nav" class="btn btn-primary">احجزي الآن</a>
+        </div>
+    </header>
+
+    <section id="hero" class="hero">
+        <div class="container hero-content">
+            <h1>دللي نفسك بتجربة فاخرة في قطر</h1>
+            <p>نحن نحول العناية بالجمال إلى فن راقٍ. استرخي واحصلي على أفضل الخدمات بأيدي خبيراتنا المتميزات.</p>
+            <div class="hero-btns">
+                <a href="#services" class="btn btn-primary">اكتشفي خدماتنا</a>
+                <a href="#booking" class="btn btn-outline"
+                    style="margin-right: 15px; border-color: white; color: white;">حجز موعد فوري</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section-padding" style="background: white;">
+        <div class="container">
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 50px; align-items: center;">
+                <div class="reveal">
+                    <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=600&auto=format&fit=crop"
+                        alt="Interior" style="width: 100%; border-radius: 20px; box-shadow: var(--shadow-premium);">
+                </div>
+                <div class="reveal">
+                    <h2 class="section-title" style="text-align: right; margin-right: 0;">من نحن</h2>
+                    <p style="font-size: 1.1rem; margin-bottom: 20px;">
+                        صالون "جمال وأناقة" هو الوجهة الأولى للمرأة القطرية التي تبحث عن الفخامة والتميز. نقدم تجربة
+                        شاملة للعناية بالجمال في بيئة هادئة وراقية.
+                    </p>
+                    <p style="font-size: 1.1rem;">
+                        فريقنا يتكون من خبيرات دوليات متخصصات في أحدث صيحات الموضة والجمال، لنضمن لكِ إطلالة ساحرة تليق
+                        بكِ.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="section-padding" style="background: var(--bg-light);">
+        <div class="container">
+            <h2 class="section-title reveal">خدماتنا المتميزة</h2>
+            <div class="service-grid">
+                <!-- Hair Services Card -->
+                <div class="service-card reveal">
+                    <div class="service-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop"
+                            alt="Hair">
+                    </div>
+                    <div class="service-card-content">
+                        <h3>خدمات الشعر</h3>
+                        <p>دللي شعرك بأحدث القصات، الصبغات العالمية المعالجة، وتصاميم تصفيف الشعر للمناسبات الساحرة.</p>
+                        <a href="#booking" class="card-btn">اكتشفي المزيد <span>←</span></a>
+                    </div>
+                </div>
+
+                <!-- Skin care Card -->
+                <div class="service-card reveal" style="transition-delay: 0.1s;">
+                    <div class="service-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600&auto=format&fit=crop"
+                            alt="Skin">
+                    </div>
+                    <div class="service-card-content">
+                        <h3>العناية بالبشرة</h3>
+                        <p>استعيدي نضارة بشرتك مع جلسات التنظيف العميق، تقنيات الهيدرافيشل، وماسكات الذهب الملكية.</p>
+                        <a href="#booking" class="card-btn">اكتشفي المزيد <span>←</span></a>
+                    </div>
+                </div>
+
+                <!-- Nails Card -->
+                <div class="service-card reveal" style="transition-delay: 0.2s;">
+                    <div class="service-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?q=80&w=600&auto=format&fit=crop"
+                            alt="Nails">
+                    </div>
+                    <div class="service-card-content">
+                        <h3>الأظافر والمكياج</h3>
+                        <p>أناقة يديكِ هي أولويتنا مع أفضل خبيرات المانيكير وفنون المكياج التي تبرز جمالكِ الطبيعي.</p>
+                        <a href="#booking" class="card-btn">اكتشفي المزيد <span>←</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="booking" class="booking-section">
+        <div class="container">
+            <div class="booking-card glass-panel reveal">
+                <h2 style="text-align: center; margin-bottom: 30px;">احجزِي موعداً</h2>
+                <form id="booking-form">
+                    <!-- Step 1: Category -->
+                    <div class="step-content active" id="step-1">
+                        <label class="form-label">1. اختاري فئة الخدمة</label>
+                        <div class="options-grid">
+                            <div class="option-item" data-type="category" data-value="شعر">
+                                <span>💇‍♀️</span><br>خدمات الشعر
+                            </div>
+                            <div class="option-item" data-type="category" data-value="بشرة">
+                                <span>✨</span><br>عناية البشرة
+                            </div>
+                            <div class="option-item" data-type="category" data-value="أظافر">
+                                <span>💅</span><br>أظافر
+                            </div>
+                            <div class="option-item" data-type="category" data-value="مكياج">
+                                <span>💄</span><br>مكياج
+                            </div>
+                        </div>
+                        <div style="text-align: left; margin-top: 30px;">
+                            <button type="button" class="btn btn-primary next-step">المتابعة</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Sub-Service (Dynamic) -->
+                    <div class="step-content" id="step-2">
+                        <label class="form-label">2. اختاري الخدمة والسعر</label>
+                        <div class="options-grid" id="sub-services-grid">
+                            <!-- Injected by JS -->
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                            <button type="button" class="btn btn-outline prev-step">السابق</button>
+                            <button type="button" class="btn btn-primary next-step">المتابعة</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Date/Time -->
+                    <div class="step-content" id="step-3">
+                        <label class="form-label">3. التوقيت المناسب</label>
+                        <input type="date" class="form-control" id="booking-date" style="margin: 20px 0;">
+                        <select class="form-control" id="booking-time">
+                            <option value="">اختر الجلسة أولاً</option>
+                        </select>
+                        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                            <button type="button" class="btn btn-outline prev-step">السابق</button>
+                            <button type="button" class="btn btn-primary next-step">التالي</button>
+                        </div>
+                    </div>
+                    <!-- Step 4: Contact -->
+                    <div class="step-content" id="step-4">
+                        <label class="form-label">4. بيانات التواصل</label>
+                        <input type="text" id="cust-name" class="form-control" placeholder="الاسم"
+                            style="margin: 20px 0;">
+                        <input type="tel" id="cust-phone" class="form-control" placeholder="رقم الجوال">
+                        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                            <button type="button" class="btn btn-outline prev-step">السابق</button>
+                            <button type="submit" class="btn btn-primary">تأكيد الحجز</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="section-padding">
+        <div class="container">
+            <h2 class="section-title reveal">أرآء العملاء</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div class="service-card reveal">
+                    <p>"أفضل تجربة صالون في الدوحة! احترافية عالية ونتائج مذهلة."</p>
+                    <small>- سارة م.</small>
+                </div>
+                <div class="service-card reveal">
+                    <p>"تعامل راقي جداً والخدمة سريعة ومميزة. شكراً لكم!"</p>
+                    <small>- ليلى ح.</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section-padding" style="background: var(--bg-light);">
+        <div class="container">
+            <h2 class="section-title reveal">اتصلي بنا</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+                <div class="reveal">
+                    <h3>معلومات التواصل</h3>
+                    <p>📍 لوسيل، الدوحة، قطر</p>
+                    <p>📞 +974 5555 6666</p>
+                    <p>✉️ info@jamalbeauty.com</p>
+                </div>
+                <div class="reveal">
+                    <form>
+                        <input type="tel" class="form-control" placeholder="رقم الجوال" style="margin-bottom: 10px;"
+                            required>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">إرسال طلب
+                            تواصل</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="background: var(--bg-dark); color: white; padding: 40px 0; text-align: center;">
+        <p>&copy; 2026 صالون جمال وأناقة - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/booking.js"></script>
+</body>
+
+</html>
