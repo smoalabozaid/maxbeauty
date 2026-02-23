@@ -144,6 +144,16 @@
             color: #155724;
         }
 
+        .status-attended {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-walkin {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
         .btn-sm {
             padding: 6px 12px;
             font-size: 0.85rem;
@@ -690,12 +700,13 @@
                         <td data-label="التاريخ">${a.appointment_date}</td>
                         <td data-label="الوقت">${a.appointment_time}</td>
                         <td data-label="الحالة">
-                            <span class="status-badge ${a.status === 'pending' ? 'status-pending' : (a.status === 'confirmed' ? 'status-confirmed' : 'status-walkin')}">
-                                ${a.status === 'pending' ? 'قيد الانتظار' : (a.status === 'walk-in' ? 'حضوري' : 'تم التأكيد')}
+                            <span class="status-badge ${a.status === 'pending' ? 'status-pending' : (a.status === 'confirmed' ? 'status-confirmed' : (a.status === 'attended' ? 'status-attended' : 'status-walkin'))}">
+                                ${a.status === 'pending' ? 'قيد الانتظار' : (a.status === 'walk-in' ? 'حضوري' : (a.status === 'attended' ? 'تم الحضور' : 'تم التأكيد'))}
                             </span>
                         </td>
                         <td data-label="الإجراءات">
                             ${a.status === 'pending' ? `<button class="btn-sm btn-confirm" onclick="updateStatus(${a.id}, 'confirmed')">تأكيد</button>` : ''}
+                            ${(a.status === 'pending' || a.status === 'confirmed') ? `<button class="btn-sm btn-confirm" style="background: #28a745;" onclick="updateStatus(${a.id}, 'attended')">تم الحضور</button>` : ''}
                             <button class="btn-sm btn-delete" onclick="deleteBooking(${a.id})">حذف</button>
                         </td>
                     </tr>
@@ -721,8 +732,13 @@
                 if (!customers[phone]) {
                     customers[phone] = { name, count: 0, total: 0, last: a.appointment_date };
                 }
-                customers[phone].count++;
-                customers[phone].total += price;
+
+                // Only count revenue from attended or walk-in
+                if (a.status === 'attended' || a.status === 'walk-in') {
+                    customers[phone].total += price;
+                    customers[phone].count++; // Only count actual visits
+                }
+
                 if (new Date(a.appointment_date) > new Date(customers[phone].last)) {
                     customers[phone].last = a.appointment_date;
                 }
@@ -752,7 +768,11 @@
             appointments.forEach(a => {
                 const priceMatch = (a.price || "").match(/(\d+)/);
                 const price = priceMatch ? parseInt(priceMatch[0]) : 0;
-                totalRev += price;
+
+                // Revenue only from paid visits
+                if (a.status === 'attended' || a.status === 'walk-in') {
+                    totalRev += price;
+                }
 
                 services[a.service_name] = (services[a.service_name] || 0) + 1;
                 if (a.category) {
@@ -761,7 +781,9 @@
             });
 
             revEl.innerText = `${totalRev} QAR`;
-            avgEl.innerText = `${appointments.length ? Math.round(totalRev / appointments.length) : 0} QAR`;
+            // Average based on actual paid visits
+            const paidVisits = appointments.filter(a => a.status === 'attended' || a.status === 'walk-in').length;
+            avgEl.innerText = `${paidVisits ? Math.round(totalRev / paidVisits) : 0} QAR`;
 
             // Top Services
             const sortedServices = Object.entries(services).sort((a, b) => b[1] - a[1]).slice(0, 5);
