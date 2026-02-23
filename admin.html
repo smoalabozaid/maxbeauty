@@ -602,11 +602,12 @@
                 <div style="text-align: left; margin-top: 20px;">
                     <button type="button" class="btn btn-outline" onclick="closeServiceModal()">إلغاء</button>
                     <button type="submit" class="btn btn-primary">حفظ الخدمة</button>
-                </div>
             </form>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-config.js"></script>
     <script>
         // Initial Default Services
         const defaultServices = {
@@ -633,17 +634,32 @@
             ]
         };
 
-        function getServices() {
-            const stored = localStorage.getItem('beauty_services');
-            return stored ? JSON.parse(stored) : defaultServices;
+        async function getServices() {
+            const { data, error } = await window.supabaseClient.from('services').select('*');
+            if (error) {
+                console.error('Error fetching services:', error);
+                return {};
+            }
+            // Group by category
+            return data.reduce((acc, s) => {
+                if (!acc[s.category]) acc[s.category] = [];
+                acc[s.category].push({ id: s.id, name: s.name, price: s.price, desc: s.description });
+                return acc;
+            }, {});
         }
 
-        function saveServices(services) {
-            localStorage.setItem('beauty_services', JSON.stringify(services));
+        async function saveServices(services) {
+            // This function is no longer needed as we perform individual CRUD operations
         }
 
-        function loadAdminData() {
-            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+        async function loadAdminData() {
+            const { data: appointments, error } = await window.supabaseClient.from('appointments').select('*').order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching appointments:', error);
+                return;
+            }
+
             const listContainer = document.getElementById('bookings-list');
             const totalEl = document.getElementById('total-bookings');
             const pendingEl = document.getElementById('pending-bookings');
@@ -658,19 +674,19 @@
                 noDataEl.style.display = 'block';
             } else {
                 noDataEl.style.display = 'none';
-                listContainer.innerHTML = [...appointments].reverse().map((a, index) => `
+                listContainer.innerHTML = appointments.map((a, index) => `
                     <tr>
                         <td>
-                            <strong>${a.customer ? a.customer.name : (a.name || 'مجهول')}</strong><br>
-                            <small style="color: #888;">${a.customer ? a.customer.phone : (a.phone || '')}</small>
+                            <strong>${a.customer_name || 'مجهول'}</strong><br>
+                            <small style="color: #888;">${a.customer_phone || ''}</small>
                         </td>
                         <td>${a.category || '-'}</td>
-                        <td>${a.service}</td>
+                        <td>${a.service_name}</td>
                         <td><strong style="color: var(--primary-gold-dark);">${a.price || '-'}</strong></td>
-                        <td>${a.date}</td>
-                        <td>${a.time}</td>
+                        <td>${a.appointment_date}</td>
+                        <td>${a.appointment_time}</td>
                         <td>
-                            <span class="status-badge ${a.status === 'pending' ? 'status-pending' : 'status-confirmed'}">
+                            <span class="status-badge ${a.status === 'pending' ? 'status-pending' : (a.status === 'confirmed' ? 'status-confirmed' : 'status-walkin')}">
                                 ${a.status === 'pending' ? 'قيد الانتظار' : (a.status === 'walk-in' ? 'حضوري' : 'تم التأكيد')}
                             </span>
                         </td>
@@ -683,29 +699,28 @@
             }
 
             renderServicesAdmin();
-            renderCustomersList();
-            renderAnalytics();
+            renderCustomersList(appointments);
+            renderAnalytics(appointments);
             loadManualServices();
         }
 
-        function renderCustomersList() {
-            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+        function renderCustomersList(appointments) {
             const container = document.getElementById('customers-list-body');
             const customers = {};
 
             appointments.forEach(a => {
-                const name = a.customer ? a.customer.name : (a.name || 'غير معروف');
-                const phone = a.customer ? a.customer.phone : (a.phone || '0');
+                const name = a.customer_name || 'غير معروف';
+                const phone = a.customer_phone || '0';
                 const priceMatch = (a.price || "").match(/(\d+)/);
                 const price = priceMatch ? parseInt(priceMatch[0]) : 0;
 
                 if (!customers[phone]) {
-                    customers[phone] = { name, count: 0, total: 0, last: a.date };
+                    customers[phone] = { name, count: 0, total: 0, last: a.appointment_date };
                 }
                 customers[phone].count++;
                 customers[phone].total += price;
-                if (new Date(a.date) > new Date(customers[phone].last)) {
-                    customers[phone].last = a.date;
+                if (new Date(a.appointment_date) > new Date(customers[phone].last)) {
+                    customers[phone].last = a.appointment_date;
                 }
             });
 
@@ -720,8 +735,7 @@
             `).join('');
         }
 
-        function renderAnalytics() {
-            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+        function renderAnalytics(appointments) {
             const revEl = document.getElementById('total-revenue');
             const avgEl = document.getElementById('avg-booking-value');
             const topList = document.getElementById('top-services-list');
@@ -736,7 +750,7 @@
                 const price = priceMatch ? parseInt(priceMatch[0]) : 0;
                 totalRev += price;
 
-                services[a.service] = (services[a.service] || 0) + 1;
+                services[a.service_name] = (services[a.service_name] || 0) + 1;
                 if (a.category) {
                     categories[a.category] = (categories[a.category] || 0) + 1;
                 }
@@ -754,7 +768,7 @@
                         <strong>${count} مرة</strong>
                     </div>
                     <div style="background: #eee; border-radius: 10px; overflow: hidden;">
-                        <div class="chart-bar" style="width: ${(count / appointments.length) * 100}%"></div>
+                        <div class="chart-bar" style="width: ${appointments.length ? (count / appointments.length) * 100 : 0}%"></div>
                     </div>
                 </div>
             `).join('');
@@ -777,8 +791,8 @@
             document.getElementById('manual-modal').style.display = 'none';
         };
 
-        function loadManualServices() {
-            const allServices = getServices();
+        async function loadManualServices() {
+            const allServices = await getServices();
             const select = document.getElementById('man-service');
             let html = '<option value="">اختر الخدمة</option>';
             for (const cat in allServices) {
@@ -795,7 +809,7 @@
             };
         }
 
-        document.getElementById('manual-reg-form').addEventListener('submit', (e) => {
+        document.getElementById('manual-reg-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('man-name').value;
             const phone = document.getElementById('man-phone').value;
@@ -804,28 +818,28 @@
             const category = serviceOpt.dataset.cat;
             const amount = document.getElementById('man-amount').value;
 
-            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-            appointments.push({
-                id: Date.now(),
-                name,
-                phone,
-                service,
+            const { error } = await window.supabaseClient.from('appointments').insert({
+                customer_name: name,
+                customer_phone: phone,
+                service_name: service,
                 category,
                 price: `${amount} QAR`,
-                date: new Date().toISOString().split('T')[0],
-                time: 'حضوري',
-                status: 'walk-in',
-                createdAt: new Date().toISOString()
+                appointment_date: new Date().toISOString().split('T')[0],
+                appointment_time: 'حضوري',
+                status: 'walk-in'
             });
 
-            localStorage.setItem('appointments', JSON.stringify(appointments));
-            closeManualModal();
-            loadAdminData();
-            alert('تم تسجيل الزبونة بنجاح!');
+            if (error) {
+                alert('خطأ في التسجيل: ' + error.message);
+            } else {
+                closeManualModal();
+                loadAdminData();
+                alert('تم تسجيل الزبونة بنجاح!');
+            }
         });
 
-        function renderServicesAdmin() {
-            const services = getServices();
+        async function renderServicesAdmin() {
+            const services = await getServices();
             const container = document.getElementById('services-container');
             let html = '';
 
@@ -841,7 +855,7 @@
                             </div>
                             <div class="service-actions">
                                 <button class="btn-sm btn-confirm" onclick="openServiceModal('${category}', ${s.id})">تعديل</button>
-                                <button class="btn-sm btn-delete" onclick="deleteService('${category}', ${s.id})">حذف</button>
+                                <button class="btn-sm btn-delete" onclick="deleteService(${s.id})">حذف</button>
                             </div>
                         </div>
                     `;
@@ -867,20 +881,23 @@
         });
 
         // Service Modal Functions
-        window.openServiceModal = (category = 'شعر', id = null) => {
+        window.openServiceModal = async (category = 'شعر', id = null) => {
             const modal = document.getElementById('service-modal');
             const form = document.getElementById('service-form');
             const title = document.getElementById('modal-title');
 
             if (id) {
                 title.innerText = 'تعديل الخدمة';
-                const services = getServices();
-                const service = services[category].find(s => s.id === id);
+                const { data, error } = await window.supabaseClient.from('services').select('*').eq('id', id).single();
+                if (error) {
+                    alert('خطأ في جلب الخدمة: ' + error.message);
+                    return;
+                }
                 document.getElementById('service-id').value = id;
-                document.getElementById('service-category').value = category;
-                document.getElementById('service-name').value = service.name;
-                document.getElementById('service-price').value = service.price;
-                document.getElementById('service-desc').value = service.desc;
+                document.getElementById('service-category').value = data.category;
+                document.getElementById('service-name').value = data.name;
+                document.getElementById('service-price').value = data.price;
+                document.getElementById('service-desc').value = data.description;
             } else {
                 title.innerText = 'إضافة خدمة جديدة';
                 form.reset();
@@ -894,7 +911,7 @@
             document.getElementById('service-modal').style.display = 'none';
         };
 
-        document.getElementById('service-form').addEventListener('submit', (e) => {
+        document.getElementById('service-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('service-id').value;
             const category = document.getElementById('service-category').value;
@@ -902,61 +919,69 @@
             let priceValue = document.getElementById('service-price').value;
             const desc = document.getElementById('service-desc').value;
 
-            // Automatically format price if it's a number
             if (!isNaN(priceValue) && priceValue.trim() !== "") {
                 priceValue = `${priceValue} QAR`;
             }
 
-            const price = priceValue;
+            const serviceData = {
+                category,
+                name,
+                price: priceValue,
+                description: desc
+            };
 
-            let services = getServices();
-
+            let error;
             if (id) {
-                // Update existing
-                // Find and remove from old category if changed
-                for (const cat in services) {
-                    services[cat] = services[cat].filter(s => s.id != id);
-                }
-                services[category].push({ id: parseInt(id), name, price, desc });
+                const { error: err } = await window.supabaseClient.from('services').update(serviceData).eq('id', id);
+                error = err;
             } else {
-                // Add new
-                const newId = Date.now();
-                if (!services[category]) services[category] = [];
-                services[category].push({ id: newId, name, price, desc });
+                const { error: err } = await window.supabaseClient.from('services').insert(serviceData);
+                error = err;
             }
 
-            saveServices(services);
-            closeServiceModal();
-            renderServicesAdmin();
-        });
-
-        window.deleteService = (category, id) => {
-            if (confirm('هل أنتِ متأكدة من حذف هذه الخدمة؟')) {
-                let services = getServices();
-                services[category] = services[category].filter(s => s.id !== id);
-                saveServices(services);
+            if (error) {
+                alert('خطأ في حفظ الخدمة: ' + error.message);
+            } else {
+                closeServiceModal();
                 renderServicesAdmin();
             }
+        });
+
+        window.deleteService = async (id) => {
+            if (confirm('هل أنتِ متأكدة من حذف هذه الخدمة؟')) {
+                const { error } = await window.supabaseClient.from('services').delete().eq('id', id);
+                if (error) {
+                    alert('خطأ في الحذف: ' + error.message);
+                } else {
+                    renderServicesAdmin();
+                }
+            }
         };
 
-        window.updateStatus = (id, newStatus) => {
-            let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-            appointments = appointments.map(a => a.id === id ? { ...a, status: newStatus } : a);
-            localStorage.setItem('appointments', JSON.stringify(appointments));
-            loadAdminData();
-        };
-
-        window.deleteBooking = (id) => {
-            if (confirm('هل أنتِ متأكدة من حذف هذا الحجز؟')) {
-                let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-                appointments = appointments.filter(a => a.id !== id);
-                localStorage.setItem('appointments', JSON.stringify(appointments));
+        window.updateStatus = async (id, newStatus) => {
+            const { error } = await window.supabaseClient.from('appointments').update({ status: newStatus }).eq('id', id);
+            if (error) {
+                alert('خطأ في تحديث الحالة: ' + error.message);
+            } else {
                 loadAdminData();
             }
         };
 
+        window.deleteBooking = async (id) => {
+            if (confirm('هل أنتِ متأكدة من حذف هذا الحجز؟')) {
+                const { error } = await window.supabaseClient.from('appointments').delete().eq('id', id);
+                if (error) {
+                    alert('خطأ في الحذف: ' + error.message);
+                } else {
+                    loadAdminData();
+                }
+            }
+        };
+
         // Security & Settings Functions
-        function checkAuth() {
+        async function checkAuth() {
+            // Check session/cookie or simple setting in Supabase
+            const { data, error } = await window.supabaseClient.from('admin_settings').select('value').eq('key', 'admin_logged_in').single();
             if (localStorage.getItem('admin_logged_in') === 'true') {
                 document.getElementById('login-overlay').style.display = 'none';
             } else {
@@ -964,10 +989,12 @@
             }
         }
 
-        window.attemptLogin = () => {
+        window.attemptLogin = async () => {
             const user = document.getElementById('login-user').value;
             const pass = document.getElementById('login-pass').value;
-            const correctPass = localStorage.getItem('admin_pass') || 'password123';
+
+            const { data, error } = await window.supabaseClient.from('admin_settings').select('value').eq('key', 'admin_password').single();
+            const correctPass = data ? data.value : 'password123';
 
             if (user === 'admin' && pass === correctPass) {
                 localStorage.setItem('admin_logged_in', 'true');
@@ -982,26 +1009,38 @@
             location.reload();
         };
 
-        window.changeAdminPassword = () => {
+        window.changeAdminPassword = async () => {
             const newPass = document.getElementById('new-password').value;
             if (newPass.length < 6) {
                 alert('الرجاء اختيار كلمة سر أطول من 6 أحرف');
                 return;
             }
-            localStorage.setItem('admin_pass', newPass);
-            alert('تم تغيير كلمة السر بنجاح!');
-            document.getElementById('new-password').value = '';
+            const { error } = await window.supabaseClient.from('admin_settings').update({ value: newPass }).eq('key', 'admin_password');
+            if (error) {
+                alert('خطأ في تغيير كلمة السر: ' + error.message);
+            } else {
+                alert('تم تغيير كلمة السر بنجاح!');
+                document.getElementById('new-password').value = '';
+            }
         };
 
-        window.saveBusinessHours = () => {
+        window.saveBusinessHours = async () => {
             const start = document.getElementById('work-start').value;
             const end = document.getElementById('work-end').value;
-            localStorage.setItem('business_hours', JSON.stringify({ start: parseInt(start), end: parseInt(end) }));
-            alert('تم حفظ ساعات العمل بنجاح!');
+            const { error } = await window.supabaseClient.from('admin_settings').update({ value: { start: parseInt(start), end: parseInt(end) } }).eq('key', 'business_hours');
+
+            if (error) {
+                alert('خطأ في الحفظ: ' + error.message);
+            } else {
+                alert('تم حفظ ساعات العمل بنجاح!');
+            }
         };
 
-        function loadSettings() {
-            const hours = JSON.parse(localStorage.getItem('business_hours') || '{"start": 10, "end": 18}');
+        async function loadSettings() {
+            const { data, error } = await window.supabaseClient.from('admin_settings').select('*').in('key', ['business_hours']);
+            const hoursSetting = data.find(s => s.key === 'business_hours');
+            const hours = hoursSetting ? hoursSetting.value : { "start": 10, "end": 18 };
+
             document.getElementById('work-start').value = hours.start;
             document.getElementById('work-end').value = hours.end;
         }

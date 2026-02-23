@@ -181,44 +181,10 @@
     <section id="services" class="section-padding" style="background: var(--bg-light);">
         <div class="container">
             <h2 class="section-title reveal">خدماتنا المتميزة</h2>
-            <div class="service-grid">
-                <!-- Hair Services Card -->
-                <div class="service-card reveal">
-                    <div class="service-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop"
-                            alt="Hair">
-                    </div>
-                    <div class="service-card-content">
-                        <h3>خدمات الشعر</h3>
-                        <p>دللي شعرك بأحدث القصات، الصبغات العالمية المعالجة، وتصاميم تصفيف الشعر للمناسبات الساحرة.</p>
-                        <a href="#booking" class="card-btn">اكتشفي المزيد <span>←</span></a>
-                    </div>
-                </div>
-
-                <!-- Skin care Card -->
-                <div class="service-card reveal" style="transition-delay: 0.1s;">
-                    <div class="service-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600&auto=format&fit=crop"
-                            alt="Skin">
-                    </div>
-                    <div class="service-card-content">
-                        <h3>العناية بالبشرة</h3>
-                        <p>استعيدي نضارة بشرتك مع جلسات التنظيف العميق، تقنيات الهيدرافيشل، وماسكات الذهب الملكية.</p>
-                        <a href="#booking" class="card-btn">اكتشفي المزيد <span>←</span></a>
-                    </div>
-                </div>
-
-                <!-- Nails Card -->
-                <div class="service-card reveal" style="transition-delay: 0.2s;">
-                    <div class="service-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?q=80&w=600&auto=format&fit=crop"
-                            alt="Nails">
-                    </div>
-                    <div class="service-card-content">
-                        <h3>الأظافر والمكياج</h3>
-                        <p>أناقة يديكِ هي أولويتنا مع أفضل خبيرات المانيكير وفنون المكياج التي تبرز جمالكِ الطبيعي.</p>
-                        <a href="#booking" class="card-btn">اكتشفي المزيد <span>←</span></a>
-                    </div>
+            <div class="service-grid" id="dynamic-services-grid">
+                <!-- Services will be loaded from Supabase here -->
+                <div class="loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                    <p>جاري تحميل الخدمات...</p>
                 </div>
             </div>
         </div>
@@ -333,8 +299,49 @@
         <p>&copy; 2026 صالون جمال وأناقة - جميع الحقوق محفوظة</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/main.js"></script>
     <script src="assets/js/booking.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const grid = document.getElementById('dynamic-services-grid');
+            const { data, error } = await window.supabaseClient.from('services').select('*');
+
+            if (data && data.length > 0) {
+                // Group by category to show representative cards
+                const categories = data.reduce((acc, s) => {
+                    if (!acc[s.category]) acc[s.category] = { name: s.category, desc: s.description };
+                    return acc;
+                }, {});
+
+                const categoryImages = {
+                    'شعر': 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=600&auto=format&fit=crop',
+                    'بشرة': 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=600&auto=format&fit=crop',
+                    'أظافر': 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?q=80&w=600&auto=format&fit=crop',
+                    'مكياج': 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=600&auto=format&fit=crop'
+                };
+
+                grid.innerHTML = Object.keys(categories).map((cat, index) => `
+                    <div class="service-card reveal" style="transition-delay: ${index * 0.1}s">
+                        <div class="service-img-wrapper">
+                            <img src="${categoryImages[cat] || 'https://images.unsplash.com/photo-1527799822367-a233b47b0ee6?q=80&w=600&auto=format&fit=crop'}" alt="${cat}">
+                        </div>
+                        <div class="service-card-content">
+                            <h3>خدمات ${cat}</h3>
+                            <p>${categories[cat].desc || 'نقدم أفضل خدمات العناية والجمال المتخصصة.'}</p>
+                            <a href="#booking" class="card-btn">اكتشفي المزيد <span>←</span></a>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Trigger reveal for new elements
+                if (window.revealOnScroll) window.revealOnScroll();
+            } else {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">لا توجد خدمات متاحة حالياً.</p>';
+            }
+        });
+    </script>
 </body>
 
 </html>

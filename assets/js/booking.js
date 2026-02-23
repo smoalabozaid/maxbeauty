@@ -29,9 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    function getServices() {
-        const stored = localStorage.getItem('beauty_services');
-        return stored ? JSON.parse(stored) : defaultServices;
+    // Service Retrieval from Supabase
+    async function getServices() {
+        const { data, error } = await window.supabaseClient.from('services').select('*');
+        if (error) {
+            console.error('Error fetching services:', error);
+            return {};
+        }
+        return data.reduce((acc, s) => {
+            if (!acc[s.category]) acc[s.category] = [];
+            acc[s.category].push({ id: s.id, name: s.name, price: s.price, desc: s.description });
+            return acc;
+        }, {});
     }
 
     // Data Store for Booking
@@ -49,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Category Selection
     document.querySelectorAll('.option-item[data-type="category"]').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', async () => {
             const parentGrid = item.parentElement;
             parentGrid.querySelectorAll('.option-item').forEach(opt => opt.classList.remove('selected'));
 
@@ -58,13 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
             bookingData.category = category;
 
             // Populate Sub-Services
-            renderSubServices(category);
+            await renderSubServices(category);
         });
     });
 
-    function renderSubServices(category) {
+    async function renderSubServices(category) {
         const subGrid = document.getElementById('sub-services-grid');
-        const services = getServices()[category] || [];
+        const allServices = await getServices();
+        const services = allServices[category] || [];
 
         if (services.length === 0) {
             subGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">لا توجد خدمات حالياً في هذه الفئة.</p>';
@@ -94,9 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('booking-date');
     const timeInput = document.getElementById('booking-time');
 
-    function renderTimeSlots(date) {
-        const hours = JSON.parse(localStorage.getItem('business_hours') || '{"start": 10, "end": 18}');
-        const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+    async function renderTimeSlots(date) {
+        // Fetch Settings and Bookings from Supabase
+        const { data: settings } = await window.supabaseClient.from('admin_settings').select('value').eq('key', 'business_hours').single();
+        const { data: appointments } = await window.supabaseClient.from('appointments').select('appointment_time').eq('appointment_date', date).neq('status', 'cancelled');
+
+        const hours = settings ? settings.value : { "start": 10, "end": 18 };
+        const takenSlots = appointments ? appointments.map(a => a.appointment_time) : [];
 
         let html = '<option value="">اختر الوقت المناسب</option>';
 
@@ -105,8 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const ampm = i >= 12 ? 'مساءً' : 'صباحاً';
             const timeStr = `${hour12}:00 ${ampm}`;
 
-            // Check if slot is taken
-            const isTaken = appointments.some(a => a.date === date && a.time === timeStr && a.status !== 'cancelled');
+            const isTaken = takenSlots.includes(timeStr);
 
             if (isTaken) {
                 html += `<option value="${timeStr}" disabled style="color: #ccc;">${timeStr} (محجوز)</option>`;
@@ -115,15 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         timeInput.innerHTML = html;
-        bookingData.time = ''; // Reset booking data time
+        bookingData.time = '';
     }
 
     if (dateInput) {
-        dateInput.addEventListener('change', (e) => {
+        dateInput.addEventListener('change', async (e) => {
             bookingData.date = e.target.value;
-            renderTimeSlots(e.target.value);
+            await renderTimeSlots(e.target.value);
         });
-        // Set today's date as minimum
         const today = new Date().toISOString().split('T')[0];
         dateInput.setAttribute('min', today);
     }
@@ -143,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
     nextBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             if (currentStep < steps.length - 1) {
-                // Validation
                 if (currentStep === 0 && !bookingData.category) {
                     alert('الرجاء اختيار نوع الخدمة أولاً');
                     return;
@@ -175,35 +186,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bookingForm = document.getElementById('booking-form');
     if (bookingForm) {
-        bookingForm.addEventListener('submit', (e) => {
+        bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             bookingData.customer.name = document.getElementById('cust-name').value;
             bookingData.customer.phone = document.getElementById('cust-phone').value;
 
-            // Simple validation
             if (!bookingData.customer.name || !bookingData.customer.phone || !bookingData.date || !bookingData.time) {
                 alert('الرجاء إكمال كافة البيانات');
                 return;
             }
 
-            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            // Final Double-Booking Check on Supabase
+            const { data: existing } = await window.supabaseClient.from('appointments')
+                .select('id')
+                .eq('appointment_date', bookingData.date)
+                .eq('appointment_time', bookingData.time)
+                .neq('status', 'cancelled');
 
-            // Final Double-Booking Check
-            const isTaken = appointments.some(a => a.date === bookingData.date && a.time === bookingData.time && a.status !== 'cancelled');
-            if (isTaken) {
+            if (existing && existing.length > 0) {
                 alert('عذراً، هذا الموعد تم حجزه للتو. يرجى اختيار موعد آخر.');
-                renderTimeSlots(bookingData.date); // Refresh slots
+                renderTimeSlots(bookingData.date);
                 return;
             }
 
-            appointments.push({ ...bookingData, id: Date.now(), status: 'pending', createdAt: new Date().toISOString() });
-            localStorage.setItem('appointments', JSON.stringify(appointments));
+            const { error } = await window.supabaseClient.from('appointments').insert({
+                customer_name: bookingData.customer.name,
+                customer_phone: bookingData.customer.phone,
+                category: bookingData.category,
+                service_name: bookingData.service,
+                price: bookingData.price,
+                appointment_date: bookingData.date,
+                appointment_time: bookingData.time,
+                status: 'pending'
+            });
 
-            alert('تم استلام طلب الحجز بنجاح! سنتواصل معكِ قريباً لتأكيد الموعد.');
-
-            // Clear booking data and reset
-            bookingForm.reset();
-            location.reload();
+            if (error) {
+                alert('خطأ في إرسال الحجز: ' + error.message);
+            } else {
+                alert('تم استلام طلب الحجز بنجاح! سنتواصل معكِ قريباً لتأكيد الموعد.');
+                bookingForm.reset();
+                location.reload();
+            }
         });
     }
 });
