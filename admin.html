@@ -349,6 +349,10 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Mobile Toggle -->
+            <button id="admin-mobile-toggle"
+                style="display: none; position: fixed; top: 15px; left: 15px; z-index: 3000; background: var(--bg-dark); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">☰
+                قائمة الإدارة</button>
             <!-- Main Dashboard Section -->
             <div id="main-dashboard" class="section-content active">
                 <div class="header-section">
@@ -379,14 +383,14 @@
                     <table id="admin-table">
                         <thead>
                             <tr>
-                                <th>العميلة</th>
-                                <th>الفئة</th>
-                                <th>الخدمة</th>
-                                <th>السعر</th>
-                                <th>التاريخ</th>
-                                <th>الوقت</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
+                                <th data-label="العميلة">العميلة</th>
+                                <th data-label="الفئة">الفئة</th>
+                                <th data-label="الخدمة">الخدمة</th>
+                                <th data-label="السعر">السعر</th>
+                                <th data-label="التاريخ">التاريخ</th>
+                                <th data-label="الوقت">الوقت</th>
+                                <th data-label="الحالة">الحالة</th>
+                                <th data-label="الإجراءات">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="bookings-list">
@@ -420,11 +424,11 @@
                     <table id="customers-table">
                         <thead>
                             <tr>
-                                <th>الاسم</th>
-                                <th>رقم الجوال</th>
-                                <th>عدد الزيارات</th>
-                                <th>إجمالي المدفوعات</th>
-                                <th>آخر زيارة</th>
+                                <th data-label="الاسم">الاسم</th>
+                                <th data-label="رقم الجوال">رقم الجوال</th>
+                                <th data-label="عدد الزيارات">عدد الزيارات</th>
+                                <th data-label="إجمالي المدفوعات">إجمالي المدفوعات</th>
+                                <th data-label="آخر زيارة">آخر زيارة</th>
                             </tr>
                         </thead>
                         <tbody id="customers-list-body">
@@ -676,21 +680,21 @@
                 noDataEl.style.display = 'none';
                 listContainer.innerHTML = appointments.map((a, index) => `
                     <tr>
-                        <td>
+                        <td data-label="العميلة">
                             <strong>${a.customer_name || 'مجهول'}</strong><br>
                             <small style="color: #888;">${a.customer_phone || ''}</small>
                         </td>
-                        <td>${a.category || '-'}</td>
-                        <td>${a.service_name}</td>
-                        <td><strong style="color: var(--primary-gold-dark);">${a.price || '-'}</strong></td>
-                        <td>${a.appointment_date}</td>
-                        <td>${a.appointment_time}</td>
-                        <td>
+                        <td data-label="الفئة">${a.category || '-'}</td>
+                        <td data-label="الخدمة">${a.service_name}</td>
+                        <td data-label="السعر"><strong style="color: var(--primary-gold-dark);">${a.price || '-'}</strong></td>
+                        <td data-label="التاريخ">${a.appointment_date}</td>
+                        <td data-label="الوقت">${a.appointment_time}</td>
+                        <td data-label="الحالة">
                             <span class="status-badge ${a.status === 'pending' ? 'status-pending' : (a.status === 'confirmed' ? 'status-confirmed' : 'status-walkin')}">
                                 ${a.status === 'pending' ? 'قيد الانتظار' : (a.status === 'walk-in' ? 'حضوري' : 'تم التأكيد')}
                             </span>
                         </td>
-                        <td>
+                        <td data-label="الإجراءات">
                             ${a.status === 'pending' ? `<button class="btn-sm btn-confirm" onclick="updateStatus(${a.id}, 'confirmed')">تأكيد</button>` : ''}
                             <button class="btn-sm btn-delete" onclick="deleteBooking(${a.id})">حذف</button>
                         </td>
@@ -726,11 +730,11 @@
 
             container.innerHTML = Object.keys(customers).map(phone => `
                 <tr>
-                    <td><strong>${customers[phone].name}</strong></td>
-                    <td>${phone}</td>
-                    <td>${customers[phone].count}</td>
-                    <td>${customers[phone].total} QAR</td>
-                    <td>${customers[phone].last}</td>
+                    <td data-label="الاسم"><strong>${customers[phone].name}</strong></td>
+                    <td data-label="رقم الجوال">${phone}</td>
+                    <td data-label="عدد الزيارات">${customers[phone].count}</td>
+                    <td data-label="إجمالي المدفوعات">${customers[phone].total} QAR</td>
+                    <td data-label="آخر زيارة">${customers[phone].last}</td>
                 </tr>
             `).join('');
         }
@@ -980,14 +984,32 @@
 
         // Security & Settings Functions
         async function checkAuth() {
-            // Check session/cookie or simple setting in Supabase
-            const { data, error } = await window.supabaseClient.from('admin_settings').select('value').eq('key', 'admin_logged_in').single();
-            if (localStorage.getItem('admin_logged_in') === 'true') {
+            // Hide everything initially
+            document.querySelector('.dashboard-container').style.opacity = '0';
+
+            const loggedIn = localStorage.getItem('admin_logged_in') === 'true';
+            if (loggedIn) {
                 document.getElementById('login-overlay').style.display = 'none';
+                document.querySelector('.dashboard-container').style.opacity = '1';
+                loadAdminData();
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
             }
         }
+
+        // Mobile Toggle for Admin
+        document.getElementById('admin-mobile-toggle').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+
+        // Close sidebar when clicking a link (on mobile)
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.sidebar').classList.remove('active');
+                }
+            });
+        });
 
         window.attemptLogin = async () => {
             const user = document.getElementById('login-user').value;

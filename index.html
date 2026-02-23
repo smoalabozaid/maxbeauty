@@ -130,17 +130,23 @@
 <body>
 
     <header id="main-header">
-        <div class="navbar">
-            <a href="#hero" class="logo">جمال وأناقة</a>
-            <ul class="nav-links">
-                <li><a href="#hero">الرئيسية</a></li>
-                <li><a href="#services">خدماتنا</a></li>
-                <li><a href="#about">من نحن</a></li>
-                <li><a href="#testimonials">آراء العميلات</a></li>
-                <li><a href="#contact">اتصل بنا</a></li>
+        <nav class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="index.html" class="logo"
+                style="color: var(--primary-gold); text-decoration: none; font-size: 1.8rem; font-weight: 700;">جمال
+                وأناقة</a>
+
+            <button class="mobile-nav-toggle" id="mobile-menu-btn">☰</button>
+
+            <ul class="nav-links" id="nav-links-menu" style="display: flex; list-style: none; gap: 30px;">
+                <li><a href="#about" style="text-decoration: none; color: inherit; font-weight: 600;">من نحن</a></li>
+                <li><a href="#services" style="text-decoration: none; color: inherit; font-weight: 600;">خدماتنا</a>
+                </li>
+                <li><a href="#booking" style="text-decoration: none; color: inherit; font-weight: 600;">حجز موعد</a>
+                </li>
+                <!-- <li><a href="admin.html" style="text-decoration: none; color: var(--primary-gold-dark); font-weight: 700;">الإدارة</a></li> -->
             </ul>
             <a href="#booking" id="book-btn-nav" class="btn btn-primary">احجزي الآن</a>
-        </div>
+        </nav>
     </header>
 
     <section id="hero" class="hero">
