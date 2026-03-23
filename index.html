@@ -348,6 +348,51 @@
             }
         });
     </script>
+
+    <script>
+        (function (d, t) {
+            var g = document.createElement(t),
+                s = d.getElementsByTagName(t)[0];
+            g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+            g.defer = true;
+            g.async = true;
+            s.parentNode.insertBefore(g, s);
+
+            g.onload = function () {
+                window.vapiSDK.run({
+                    apiKey: "c7534ca1-37e6-45b3-9204-b53979ffe1e0", // provided API key
+                    assistant: "6984738b-5358-42a2-a092-69457a9ec073", // provided Assistant ID
+                    config: {
+                        position: "bottom-left",
+                        offset: "30px",
+                        width: "60px",
+                        height: "60px",
+                        idle: {
+                            color: "#C5A059", // primary-gold
+                            type: "pill",
+                            title: "تحدثي مع الخبيرة",
+                            subtitle: "المساعدة الصوتية",
+                            icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone.svg"
+                        },
+                        loading: {
+                            color: "#EAD196", // primary-gold-light
+                            type: "pill",
+                            title: "جاري الاتصال...",
+                            subtitle: "لحظات من فضلك",
+                            icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg"
+                        },
+                        active: {
+                            color: "#0F0F0F", // bg-dark
+                            type: "pill",
+                            title: "المكالمة قيد التشغيل",
+                            subtitle: "تحدثي الآن",
+                            icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg"
+                        }
+                    }
+                });
+            };
+        })(document, "script");
+    </script>
 </body>
 
 </html>
